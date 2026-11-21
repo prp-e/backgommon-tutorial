@@ -120,3 +120,15 @@ p { line-height: 1.95; margin: .65rem 0; }
   .board { aspect-ratio: 1.45; }
 }
 @media (prefers-reduced-motion: reduce) { .die.rolling { animation: none; } }
+
+.table .hint { margin: 0 0 .75rem; }
+#practice { padding: .6rem 0; line-height: 1.8; }
+.quiz-choices { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.guide-actions { margin-top: .9rem; }
+.point.place-here { background: #9bdfb34d; box-shadow: inset 0 0 0 2px var(--green); }
+.placement-count {
+  position: absolute; inset-inline: 5%; inset-block-start: 42%;
+  border-radius: .35rem; background: #172e21; color: var(--green);
+  font-weight: 800; font-size: clamp(.7rem, 2vw, 1rem); pointer-events: none;
+}
+.lesson-solved { box-shadow: 0 0 0 2px var(--green); }

@@ -8,13 +8,34 @@ const { BAR, OFF } = Rules;
 let lesson = 0;
 let tutorial = true;
 let state, player, phase, selected, dice, remaining, options, message;
+const setupOrder = [23, 12, 7, 5];
+const setupCounts = Rules.initial().points;
+const questions = [
+  {
+    prompt: 'حریف هیچ مهره‌ای خارج نکرده و مهره‌ای روی خط وسط دارد. برد چند امتیاز پایه دارد؟',
+    options: ['۱ امتیاز', '۲ امتیاز', '۳ امتیاز'], answer: 2,
+    explanation: 'برد سه‌امتیازی است، چون حریف هنوز مهره‌ای روی خط وسط دارد.',
+  },
+  {
+    prompt: 'ارزش مکعب ۲ است. اگر حریف پیشنهاد دوبل را رد کند، چند امتیاز می‌گیرید؟',
+    options: ['۱ امتیاز', '۲ امتیاز', '۴ امتیاز'], answer: 1,
+    explanation: 'با رد دوبل، امتیاز برابر با ارزش قبلی مکعب است.',
+  },
+];
+let setupIndex, quizIndex, solved;
 let scores, goal, cube, owner, usedCrawford, isCrawford, animation;
 
 function start() {
   clearTimeout(animation);
   player = 0;
-  phase = tutorial ? (Lessons[lesson].dice ? 'ready' : 'read') : 'opening';
+  const current = Lessons[lesson];
+  phase = tutorial ? (current.setup ? 'setup' : current.quiz ? 'quiz' : 'ready') : 'opening';
+  setupIndex = quizIndex = 0;
+  solved = false;
   state = tutorial && Lessons[lesson].position ? Lessons[lesson].position() : Rules.initial();
+  if (phase === 'setup') {
+    state.points = setupCounts.map(count => Math.min(0, count));
+  }
   selected = null;
   dice = [];
   remaining = [];
@@ -25,7 +46,62 @@ function start() {
   if (isCrawford) usedCrawford = true;
   message = tutorial ? (Lessons[lesson].task || Lessons[lesson].extra) :
     'برای تعیین شروع‌کننده، هر بازیکن یک تاس می‌ریزد.';
+  if (phase === 'setup') message = setupHint();
+  if (phase === 'quiz') message = 'یک گزینه را انتخاب کنید.';
   render();
+}
+
+function setupHint() {
+  const point = setupOrder[setupIndex];
+  const missing = setupCounts[point] - state.points[point];
+  return 'خانهٔ ' + fa(point + 1) + ' را بزنید. ' + fa(missing) + ' مهرهٔ روشن دیگر اینجا قرار می‌گیرد.';
+}
+
+function placeChecker(point) {
+  const target = setupOrder[setupIndex];
+  if (point !== target) {
+    message = 'خانهٔ ' + fa(point + 1) + ' جای این مهره نیست. ' + setupHint();
+    render();
+    return;
+  }
+  state.points[point]++;
+  if (state.points[point] === setupCounts[point]) setupIndex++;
+  solved = setupIndex === setupOrder.length;
+  if (solved) phase = 'done';
+  message = solved ? 'هر ۱۵ مهرهٔ روشن سر جای خود است. می‌توانید اولین حرکت را تمرین کنید.' : setupHint();
+  render();
+  (solved ? $('next') : boardButtons.get(setupOrder[setupIndex])).focus({ preventScroll: true });
+}
+
+function renderPractice() {
+  const area = $('practice');
+  area.hidden = !tutorial || phase !== 'quiz';
+  area.replaceChildren();
+  if (area.hidden) return;
+  const question = questions[quizIndex];
+  const prompt = document.createElement('strong');
+  prompt.textContent = question.prompt;
+  area.append(prompt);
+  const choices = document.createElement('div');
+  choices.className = 'quiz-choices';
+  question.options.forEach((label, index) => {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.onclick = () => {
+      if (index !== question.answer) {
+        $('status').textContent = 'یک بار دیگر امتحان کنید.';
+        return;
+      }
+      quizIndex++;
+      solved = quizIndex === questions.length;
+      if (solved) phase = 'done';
+      message = question.explanation + (solved ? ' تمرین امتیازدهی کامل شد.' : '');
+      render();
+      (solved ? $('next') : area.querySelector('button')).focus({ preventScroll: true });
+    };
+    choices.append(button);
+  });
+  area.append(choices);
 }
 
 function newMatch() {
@@ -90,6 +166,10 @@ function roll() {
 }
 
 function select(point, button) {
+  if (phase === 'setup' && point >= 0 && point < BAR) {
+    placeChecker(point);
+    return;
+  }
   if (phase !== 'moving') return;
   const targets = options.filter(move => move.from === selected && move.to === point);
   if (targets.length === 1) {
@@ -118,6 +198,7 @@ function makeMove(move) {
   updateMoves();
   if (tutorial && !options.length) {
     phase = 'done';
+    solved = true;
     message = 'آفرین! تمرین کامل شد. می‌توانید این تمرین را تکرار کنید یا به درس بعد بروید.';
   } else if (!tutorial && state.off[player] === 15) {
     const multiplier = Rules.multiplier(state, player);
@@ -213,7 +294,9 @@ function render(targets = []) {
   $('play').setAttribute('aria-pressed', !tutorial);
   $('turn').textContent = tutorial ? 'تمرین با مهرهٔ روشن' :
     phase === 'opening' ? 'تاس شروع' : 'نوبت مهرهٔ ' + names[player];
-  $('score').textContent = tutorial ? 'درس ' + fa(lesson + 1) + ' از ' + fa(Lessons.length) :
+  const settingUp = phase === 'setup';
+  const setupTarget = setupOrder[setupIndex];
+  $('score').textContent = settingUp ? fa(state.points.reduce((sum, count) => sum + Math.max(0, count), 0)) + ' از ۱۵ مهره چیده شد' : tutorial ? 'درس ' + fa(lesson + 1) + ' از ' + fa(Lessons.length) :
     'روشن ' + fa(scores[0]) + ' · تیره ' + fa(scores[1]) + ' | ' +
     (isCrawford ? 'کرافورد' : 'دوبل ' + fa(cube) + ' · ' + (owner === null ? 'وسط' : names[owner]));
   for (const [point, button] of boardButtons) {
@@ -223,7 +306,9 @@ function render(targets = []) {
     button.classList.toggle('origin', from);
     button.classList.toggle('target', to);
     button.classList.toggle('selected', selected === local);
-    button.disabled = !from && !to;
+    const placeHere = settingUp && point === setupTarget;
+    button.classList.toggle('place-here', placeHere);
+    button.disabled = !from && !to && !(settingUp && point !== BAR);
     if (point === BAR) {
       button.replaceChildren(stack(state.bar[1], 1), stack(state.bar[0], 0));
       button.setAttribute('aria-label', 'خط وسط؛ روشن ' + fa(state.bar[0]) + '، تیره ' + fa(state.bar[1]));
@@ -234,8 +319,14 @@ function render(targets = []) {
     number.className = 'point-number';
     number.textContent = fa(local + 1);
     button.replaceChildren(number, stack(Math.abs(count), count < 0 ? 1 : 0));
+    if (placeHere) {
+      const marker = document.createElement('span');
+      marker.className = 'placement-count';
+      marker.textContent = '+' + fa(setupCounts[point] - count);
+      button.append(marker);
+    }
     button.setAttribute('aria-label', 'خانهٔ ' + fa(local + 1) + '، ' +
-      (count ? fa(Math.abs(count)) + ' مهرهٔ ' + names[count < 0 ? 1 : 0] : 'خالی') + (to ? '، مقصد مجاز' : ''));
+      (count ? fa(Math.abs(count)) + ' مهرهٔ ' + names[count < 0 ? 1 : 0] : 'خالی') + (to ? '، مقصد مجاز' : '') + (placeHere ? '، جای مهرهٔ روشن' : ''));
   }
 
   $('off').textContent = 'خارج‌شده: ' + fa(state.off[0]) + ' / ' + fa(state.off[1]);
@@ -272,11 +363,15 @@ function render(targets = []) {
   $('lesson-nav').hidden = !tutorial;
   $('section').textContent = tutorial ? 'درس ' + fa(lesson + 1) : 'بازی روی یک دستگاه';
   $('lesson-title').textContent = tutorial ? current.title : 'بازی دونفره';
-  $('lesson-text').textContent = tutorial ? current.text :
+  $('lesson-text').textContent = tutorial ? current.text + (current.extra ? ' ' + current.extra : '') :
     'به‌نوبت تاس بریزید و مهره‌های خود را حرکت دهید. با انتخاب مهره، مقصدهای مجاز مشخص می‌شوند. شمارش مهره‌های خارج‌شده به ترتیب روشن و تیره است.';
   $('status').textContent = message;
+  renderPractice();
+  $('board').hidden = phase === 'quiz' || (tutorial && current.quiz);
+  $('board').classList.toggle('setup-board', settingUp);
   $('previous').hidden = !tutorial || lesson === 0;
   $('next').hidden = !tutorial;
+  $('next').classList.toggle('lesson-solved', tutorial && solved);
   $('next').textContent = lesson === Lessons.length - 1 ? 'شروع بازی دونفره' : 'درس بعدی';
   [...$('lesson-nav').children].forEach((button, index) => button.setAttribute('aria-current', index === lesson ? 'step' : 'false'));
 }
