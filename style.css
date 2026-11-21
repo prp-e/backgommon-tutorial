@@ -55,7 +55,7 @@ p { line-height: 1.95; margin: .65rem 0; }
 #score { color: var(--gold); font-size: .9rem; }
 .board {
   display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(0, .69fr) repeat(6, minmax(0, 1fr));
-  grid-template-rows: 1fr 1fr; aspect-ratio: 1.5; min-height: 175px; padding: 2.4%;
+  grid-template-rows: repeat(2, minmax(0, 1fr)); aspect-ratio: 1.5; min-height: 175px; padding: 2.4%;
   background: #293b2a url("assets/board.jpg") center / 100% 100% no-repeat; border-radius: .45rem;
   box-shadow: 0 6px 13px #130e09; overflow: hidden;
 }
