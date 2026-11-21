@@ -368,7 +368,7 @@ function render(targets = []) {
   $('status').textContent = message;
   renderPractice();
   $('board').hidden = phase === 'quiz' || (tutorial && current.quiz);
-  $('board').classList.toggle('setup-board', settingUp);
+  $('game-tray').hidden = tutorial && (current.quiz || (current.setup && !solved));
   $('previous').hidden = !tutorial || lesson === 0;
   $('next').hidden = !tutorial;
   $('next').classList.toggle('lesson-solved', tutorial && solved);
