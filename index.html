@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تخته‌خانه | آموزش تعاملی تخته‌نرد</title>
+<meta name="description" content="تخته‌نرد را به فارسی، با تمرین‌های تعاملی و یک بازی کامل دونفره یاد بگیرید.">
+<link rel="stylesheet" href="style.css">
+<script defer src="rules.js"></script>
+<script defer src="lessons.js"></script>
+<script defer src="game.js"></script>
+</head>
+<body>
+<header class="mast"><a href="./" class="brand"><span aria-hidden="true">✦</span> تخته‌خانه</a><span>آموزش تعاملی تخته‌نرد</span></header>
+<main>
+  <section class="intro">
+    <p class="eyebrow">یادگیری با بازی</p>
+    <h1>تخته‌نرد، قدم‌به‌قدم</h1>
+    <p>از اولین تاس تا آخرین مهره، روی همین تخته تمرین کنید.</p>
+  </section>
+  <nav class="modes" aria-label="حالت بازی">
+    <button id="learn" aria-pressed="true">تمرین و آموزش</button>
+    <button id="play" aria-pressed="false">بازی دونفره</button>
+  </nav>
+  <div class="layout">
+    <section class="table" aria-label="میز بازی">
+      <div class="table-head"><span id="turn"></span><span id="score"></span></div>
+      <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
+      <div class="tray">
+        <button id="off"></button>
+        <div id="dice" dir="ltr" aria-label="تاس‌ها"></div>
+        <button id="roll">تاس بریز</button>
+      </div>
+      <div id="moves"></div>
+      <div id="controls" hidden>
+        <label>هدف مسابقه <select id="goal"><option value="1">تک‌بازی</option><option value="3">۳ امتیاز</option><option value="5">۵ امتیاز</option><option value="7">۷ امتیاز</option></select></label>
+        <button id="double">پیشنهاد دوبل</button>
+        <button id="restart">مسابقهٔ تازه</button>
+      </div>
+    </section>
+    <aside class="guide">
+      <div id="lesson-nav" aria-label="درس‌ها"></div>
+      <p class="eyebrow" id="section"></p>
+      <h2 id="lesson-title"></h2>
+      <p id="lesson-text"></p>
+      <div class="hint" id="status" role="status" aria-live="polite"></div>
+      <div class="guide-actions">
+        <button id="previous">درس قبلی</button>
+        <button id="next">درس بعدی</button>
+      </div>
+      <div class="guide-actions" id="offer" hidden>
+        <button id="accept">قبول دوبل</button><button id="decline">رد دوبل</button>
+      </div>
+    </aside>
+  </div>
+  <details class="reference">
+    <summary>مرور قوانین و امتیازدهی</summary>
+    <div id="reference"></div>
+    <p><a href="https://usbgf.org/backgammon-basics-how-to-play/">منبع قوانین فدراسیون تخته‌نرد آمریکا</a></p>
+  </details>
+</main>
+</body>
+</html>
