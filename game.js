@@ -419,3 +419,11 @@ $('roll').onclick = roll;
 $('restart').onclick = newMatch;
 $('goal').onchange = newMatch;
 start();
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(error => {
+      console.warn('Service worker registration failed:', error);
+    });
+  });
+}
