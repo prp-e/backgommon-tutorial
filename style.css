@@ -132,3 +132,38 @@ p { line-height: 1.95; margin: .65rem 0; }
   font-weight: 800; font-size: clamp(.7rem, 2vw, 1rem); pointer-events: none;
 }
 .lesson-solved { box-shadow: 0 0 0 2px var(--green); }
+
+body {
+  padding-inline-start: env(safe-area-inset-right, 0px);
+  padding-inline-end: env(safe-area-inset-left, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+button, summary { touch-action: manipulation; }
+#continue-lesson { display: none; }
+@media (max-width: 790px) {
+  .table .hint { font-size: .95rem; }
+  .modes button, .tray button, #controls button, #controls select,
+  .guide-actions button, .quiz-choices button, #lesson-nav button, #continue-lesson {
+    min-height: 44px;
+  }
+  #lesson-nav button { min-width: 44px; }
+  #continue-lesson {
+    display: block; width: 100%; margin-top: .75rem;
+    background: var(--gold); color: #24170b; border-color: var(--gold); font-weight: 700;
+  }
+}
+@media (max-width: 430px) {
+  .mast { padding-block: .75rem; }
+  .intro { padding-top: .85rem; }
+  h1 { font-size: clamp(1.55rem, 7vw, 2rem); }
+  .table .hint { padding: .6rem .7rem; }
+  .point-number { font-size: .65rem; }
+  #controls select { font-size: 1rem; }
+}
+@media (orientation: landscape) and (max-height: 540px) and (min-width: 640px) {
+  .layout { grid-template-columns: minmax(0, 1.6fr) minmax(13rem, 1fr); }
+  .intro { padding-top: .5rem; }
+  h1 { font-size: 1.75rem; }
+  .board { aspect-ratio: 1.85; }
+}

@@ -70,7 +70,7 @@ function placeChecker(point) {
   if (solved) phase = 'done';
   message = solved ? 'هر ۱۵ مهرهٔ روشن سر جای خود است. می‌توانید اولین حرکت را تمرین کنید.' : setupHint();
   render();
-  (solved ? $('next') : boardButtons.get(setupOrder[setupIndex])).focus({ preventScroll: true });
+  (solved ? nextLessonControl() : boardButtons.get(setupOrder[setupIndex])).focus({ preventScroll: true });
 }
 
 function renderPractice() {
@@ -97,7 +97,7 @@ function renderPractice() {
       if (solved) phase = 'done';
       message = question.explanation + (solved ? ' تمرین امتیازدهی کامل شد.' : '');
       render();
-      (solved ? $('next') : area.querySelector('button')).focus({ preventScroll: true });
+      (solved ? nextLessonControl() : area.querySelector('button')).focus({ preventScroll: true });
     };
     choices.append(button);
   });
@@ -373,6 +373,8 @@ function render(targets = []) {
   $('next').hidden = !tutorial;
   $('next').classList.toggle('lesson-solved', tutorial && solved);
   $('next').textContent = lesson === Lessons.length - 1 ? 'شروع بازی دونفره' : 'درس بعدی';
+  $('continue-lesson').hidden = !tutorial || !solved;
+  $('continue-lesson').textContent = $('next').textContent;
   [...$('lesson-nav').children].forEach((button, index) => button.setAttribute('aria-current', index === lesson ? 'step' : 'false'));
 }
 
@@ -380,7 +382,7 @@ for (const [index, item] of Lessons.entries()) {
   const button = document.createElement('button');
   button.textContent = fa(index + 1);
   button.setAttribute('aria-label', item.title);
-  button.onclick = () => { lesson = index; start(); };
+  button.onclick = () => openLesson(index);
   $('lesson-nav').append(button);
   const section = document.createElement('section');
   const heading = document.createElement('h3');
@@ -392,8 +394,26 @@ for (const [index, item] of Lessons.entries()) {
 }
 $('learn').onclick = () => { if (!tutorial) { tutorial = true; start(); } };
 $('play').onclick = () => { if (tutorial) { tutorial = false; newMatch(); } };
-$('previous').onclick = () => { lesson--; start(); };
-$('next').onclick = () => { if (lesson === Lessons.length - 1) $('play').click(); else { lesson++; start(); } };
+function nextLessonControl() {
+  return matchMedia('(max-width: 790px)').matches ? $('continue-lesson') : $('next');
+}
+
+function openLesson(index) {
+  lesson = index;
+  start();
+  $('status').focus();
+}
+function advanceLesson() {
+  if (lesson === Lessons.length - 1) {
+    $('play').click();
+    $('status').focus();
+  } else {
+    openLesson(lesson + 1);
+  }
+}
+$('previous').onclick = () => openLesson(lesson - 1);
+$('next').onclick = advanceLesson;
+$('continue-lesson').onclick = advanceLesson;
 $('off').onclick = () => select(OFF);
 $('roll').onclick = roll;
 $('restart').onclick = newMatch;
