@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تخته‌خانه | آموزش تعاملی تخته‌نرد</title>
-<meta name="description" content="تخته‌نرد را به فارسی، با تمرین‌های تعاملی و یک بازی کامل دونفره یاد بگیرید.">
+<meta name="description" content="تخته‌نرد را به فارسی، با تمرین‌های تعاملی و بازی با بزرگمهر یاد بگیرید.">
 <meta name="theme-color" content="#191511">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="تخته‌خانه">
@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="stylesheet" href="style.css">
 <script defer src="rules.js"></script>
+<script defer src="opponent.js"></script>
 <script defer src="lessons.js"></script>
 <script defer src="game.js"></script>
 </head>
@@ -26,12 +27,17 @@
   </section>
   <nav class="modes" aria-label="حالت بازی">
     <button id="learn" aria-pressed="true">تمرین و آموزش</button>
-    <button id="play" aria-pressed="false">بازی دونفره</button>
+    <button id="play" aria-pressed="false">بازی با رایانه</button>
   </nav>
   <div class="layout">
     <section class="table" aria-label="میز بازی">
       <div class="table-head"><span id="turn"></span><span id="score"></span></div>
       <div class="hint" id="status" tabindex="-1" role="status" aria-live="polite"></div>
+      <form id="match-name" hidden>
+        <label for="player-name">نام شما (اختیاری)</label>
+        <input id="player-name" maxlength="28" autocomplete="given-name" dir="auto">
+        <button type="submit">شروع بازی</button>
+      </form>
       <div id="practice" hidden></div>
       <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
       <div class="tray" id="game-tray">
@@ -40,6 +46,10 @@
         <button id="roll">تاس بریز</button>
       </div>
       <div id="moves"></div>
+      <div id="feedback" role="status" hidden><strong id="feedback-grade"></strong> <span id="feedback-detail"></span></div>
+      <div class="guide-actions" id="offer" hidden>
+        <button id="accept">قبول دوبل</button><button id="decline">رد دوبل</button>
+      </div>
       <button id="continue-lesson" hidden></button>
       <div id="controls" hidden>
         <label>هدف مسابقه <select id="goal"><option value="1">تک‌بازی</option><option value="3">۳ امتیاز</option><option value="5">۵ امتیاز</option><option value="7">۷ امتیاز</option></select></label>
@@ -55,9 +65,6 @@
       <div class="guide-actions">
         <button id="previous">درس قبلی</button>
         <button id="next">درس بعدی</button>
-      </div>
-      <div class="guide-actions" id="offer" hidden>
-        <button id="accept">قبول دوبل</button><button id="decline">رد دوبل</button>
       </div>
     </aside>
   </div>

@@ -167,3 +167,19 @@ button, summary { touch-action: manipulation; }
   h1 { font-size: 1.75rem; }
   .board { aspect-ratio: 1.85; }
 }
+
+#match-name { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
+#player-name {
+  flex: 1 1 11rem; min-width: 0; min-height: 44px; color: inherit;
+  background: #191511; border: 1px solid var(--line); border-radius: .65rem;
+  padding: .5rem .75rem; font: inherit; font-size: 1rem;
+}
+#match-name button { min-height: 44px; background: var(--gold); color: #24170b; font-weight: 700; }
+#feedback {
+  --rating: var(--gold); margin-top: .75rem; padding: .55rem .75rem;
+  background: #31261f; border-inline-start: 3px solid var(--rating);
+  border-radius: .5rem; line-height: 1.65;
+}
+#feedback strong { color: var(--rating); margin-inline-end: .4rem; }
+#feedback[data-grade="4"], #feedback[data-grade="3"] { --rating: var(--green); }
+#feedback[data-grade="0"], #feedback[data-grade="1"] { --rating: #ffa28b; }
