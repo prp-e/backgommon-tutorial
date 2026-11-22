@@ -282,10 +282,11 @@ function makeMove(move) {
 }
 
 function finish(winner, points, reason) {
-  gameResult = { winner, points, reason };
+  const announcement = names[winner] === 'شما' ? 'شما برنده شدید' : names[winner] + ' برنده شد';
+  gameResult = { announcement, points, reason };
   scores[winner] += points;
   phase = scores[winner] >= goal ? 'finished' : 'next';
-  message = names[winner] + ' با ' + fa(points) + ' امتیاز برنده شد. ' + reason + '؛ ' +
+  message = announcement + '. ' + fa(points) + ' امتیاز، ' + reason + '. ' +
     (phase === 'finished' ? 'مسابقه به پایان رسید.' : 'برای ادامه، بازی بعدی را شروع کنید.');
 }
 
@@ -439,7 +440,7 @@ function render(targets = []) {
   if (gameResult) {
     const matchEnded = phase === 'finished';
     $('result-kind').textContent = matchEnded && goal > 1 ? 'پایان مسابقه' : 'پایان بازی';
-    $('result-winner').textContent = names[gameResult.winner] + ' برنده شد';
+    $('result-winner').textContent = gameResult.announcement;
     $('result-points').textContent = fa(gameResult.points) + ' امتیاز · ' + gameResult.reason;
     $('result-action').textContent = matchEnded ? 'مسابقهٔ تازه' : 'بازی بعدی';
   }
