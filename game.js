@@ -6,7 +6,7 @@ const colors = ['روشن', 'تیره'];
 const names = ['شما', 'بزرگمهر'];
 const gradeLabels = ['خیلی بد', 'بد', 'متوسط', 'خوب', 'بی‌نقص'];
 const computerTurn = () => !tutorial && player === 1;
-let feedback, turnChoices, openingDice;
+let feedback, turnChoices, openingDice, gameResult;
 const randomDie = () => 1 + Math.floor(Math.random() * 6);
 const { BAR, OFF } = Rules;
 let lesson = 0;
@@ -37,6 +37,7 @@ function start() {
   setupIndex = quizIndex = 0;
   solved = false;
   feedback = null;
+  gameResult = null;
   turnChoices = [];
   openingDice = false;
   state = tutorial && Lessons[lesson].position ? Lessons[lesson].position() : Rules.initial();
@@ -270,6 +271,10 @@ function makeMove(move) {
       (hit ? ' مهرهٔ شما به خط وسط رفت.' : '');
   }
   render();
+  if (gameResult) {
+    $('result-action').focus();
+    return;
+  }
   queueComputer();
   if (computerTurn()) return;
   const focus = options.length && phase === 'moving' ? $('board').querySelector('.origin') : $('roll');
@@ -277,6 +282,7 @@ function makeMove(move) {
 }
 
 function finish(winner, points, reason) {
+  gameResult = { winner, points, reason };
   scores[winner] += points;
   phase = scores[winner] >= goal ? 'finished' : 'next';
   message = names[winner] + ' با ' + fa(points) + ' امتیاز برنده شد. ' + reason + '؛ ' +
@@ -297,7 +303,7 @@ $('double').onclick = () => {
     message = 'بزرگمهر دوبل را پذیرفت. حالا تاس بریزید.';
   }
   render();
-  (phase === 'finished' ? $('restart') : $('roll')).focus();
+  (gameResult ? $('result-action') : $('roll')).focus();
 };
 $('accept').onclick = () => {
   if (phase !== 'offer') return;
@@ -312,7 +318,7 @@ $('decline').onclick = () => {
   if (phase !== 'offer') return;
   finish(player, cube, 'رد دوبل');
   render();
-  (phase === 'finished' ? $('restart') : $('roll')).focus();
+  (gameResult ? $('result-action') : $('roll')).focus();
 };
 
 const boardButtons = new Map();
@@ -428,7 +434,15 @@ function render(targets = []) {
     opening: 'تاس شروع', pass: 'پایان نوبت', next: 'بازی بعدی', done: 'تکرار تمرین', rolling: 'در حال تاس ریختن',
   })[phase] || 'تاس بریز';
   $('match-name').hidden = !enteringName;
-  $('controls').hidden = tutorial || enteringName;
+  $('controls').hidden = tutorial || enteringName || !!gameResult;
+  $('game-result').hidden = !gameResult;
+  if (gameResult) {
+    const matchEnded = phase === 'finished';
+    $('result-kind').textContent = matchEnded && goal > 1 ? 'پایان مسابقه' : 'پایان بازی';
+    $('result-winner').textContent = names[gameResult.winner] + ' برنده شد';
+    $('result-points').textContent = fa(gameResult.points) + ' امتیاز · ' + gameResult.reason;
+    $('result-action').textContent = matchEnded ? 'مسابقهٔ تازه' : 'بازی بعدی';
+  }
   $('feedback').hidden = tutorial || !feedback;
   if (feedback && !tutorial) {
     $('feedback').dataset.grade = feedback.level;
@@ -445,7 +459,7 @@ function render(targets = []) {
   $('status').textContent = message;
   renderPractice();
   $('board').hidden = enteringName || phase === 'quiz' || (tutorial && current.quiz);
-  $('game-tray').hidden = enteringName || tutorial && (current.quiz || (current.setup && !solved));
+  $('game-tray').hidden = !!gameResult || enteringName || tutorial && (current.quiz || (current.setup && !solved));
   $('previous').hidden = !tutorial || lesson === 0;
   $('next').hidden = !tutorial;
   $('next').classList.toggle('lesson-solved', tutorial && solved);
@@ -507,6 +521,12 @@ $('continue-lesson').onclick = advanceLesson;
 $('off').onclick = () => select(OFF);
 $('roll').onclick = () => { if (!computerTurn() || ['next', 'finished'].includes(phase)) roll(); };
 $('restart').onclick = newMatch;
+$('result-action').onclick = () => {
+  if (!gameResult) return;
+  if (phase === 'finished') newMatch();
+  else start();
+  $('roll').focus();
+};
 $('goal').onchange = newMatch;
 start();
 

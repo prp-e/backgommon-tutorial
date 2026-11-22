@@ -1,7 +1,7 @@
 'use strict';
 
 const PREFIX = 'takhteh-khaneh-';
-const CACHE = PREFIX + 'v2';
+const CACHE = PREFIX + 'v3';
 const APP_FILES = [
   './', './index.html', './style.css', './rules.js', './opponent.js', './lessons.js', './game.js',
   './manifest.webmanifest', './assets/ivory.png', './assets/walnut.png',

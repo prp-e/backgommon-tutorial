@@ -39,7 +39,17 @@
         <button type="submit">شروع بازی</button>
       </form>
       <div id="practice" hidden></div>
-      <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
+      <div class="board-wrap">
+        <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
+        <section id="game-result" aria-labelledby="result-winner" hidden>
+          <div class="result-card">
+            <p class="eyebrow" id="result-kind"></p>
+            <h2 id="result-winner"></h2>
+            <p id="result-points"></p>
+            <button id="result-action"></button>
+          </div>
+        </section>
+      </div>
       <div class="tray" id="game-tray">
         <button id="off"></button>
         <div id="dice" dir="ltr" aria-label="تاس‌ها"></div>

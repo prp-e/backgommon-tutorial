@@ -183,3 +183,22 @@ button, summary { touch-action: manipulation; }
 #feedback strong { color: var(--rating); margin-inline-end: .4rem; }
 #feedback[data-grade="4"], #feedback[data-grade="3"] { --rating: var(--green); }
 #feedback[data-grade="0"], #feedback[data-grade="1"] { --rating: #ffa28b; }
+
+.board-wrap { position: relative; }
+#game-result {
+  position: absolute; inset: 0; z-index: 1;
+  display: grid; place-items: center; padding: .5rem;
+  border-radius: .45rem; background: #110d09bf;
+}
+.result-card {
+  width: min(100%, 23rem); text-align: center; padding: clamp(.55rem, 2.25vw, 1.35rem);
+  border: 1px solid var(--gold); border-radius: .85rem; background: #251e18;
+  box-shadow: 0 8px 30px #110d09cc;
+}
+.result-card :is(h2, p) { margin: .15rem 0; overflow-wrap: anywhere; }
+.result-card h2 { font-size: clamp(1.15rem, 5.5vw, 2rem); }
+#result-points { color: var(--muted); }
+#result-action {
+  min-height: 44px; margin-top: .45rem; background: var(--gold);
+  color: #24170b; border-color: var(--gold); font-weight: 700;
+}
