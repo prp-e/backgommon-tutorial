@@ -14,8 +14,8 @@
 <link rel="stylesheet" href="style.css">
 <script defer src="rules.js"></script>
 <script defer src="opponent.js"></script>
-<script defer src="lessons.js"></script>
-<script defer src="game.js"></script>
+<script defer src="reference-v6.js"></script>
+<script defer src="game-v6.js"></script>
 </head>
 <body>
 <header class="mast"><a href="./" class="brand"><span aria-hidden="true">✦</span> تخته‌خانه</a><span>آموزش تعاملی تخته‌نرد</span></header>
@@ -32,14 +32,14 @@
   <div class="layout" id="layout">
     <section class="table" aria-label="میز بازی">
       <div class="table-head"><span id="turn"></span><span id="score"></span></div>
-      <div class="hint" id="status" tabindex="-1" role="status" aria-live="polite"></div>
+      <div class="hint" id="status" tabindex="-1" role="status" aria-live="polite">در حال بارگذاری بازی… <a href="./">بارگذاری دوباره</a></div>
       <form id="match-name" hidden>
         <label for="player-name">نام شما (اختیاری)</label>
         <input id="player-name" maxlength="28" autocomplete="given-name" dir="auto">
         <button type="submit">شروع بازی</button>
       </form>
       <div class="board-wrap">
-        <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
+        <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد" hidden></div>
         <section id="game-result" aria-labelledby="result-winner" hidden>
           <div class="result-card">
             <p class="eyebrow" id="result-kind"></p>
@@ -50,7 +50,7 @@
           </div>
         </section>
       </div>
-      <div class="tray" id="game-tray">
+      <div class="tray" id="game-tray" hidden>
         <button id="off"></button>
         <div id="dice" dir="ltr" aria-label="تاس‌ها"></div>
         <button id="roll">تاس بریز</button>
