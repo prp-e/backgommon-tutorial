@@ -15,7 +15,7 @@
 <script defer src="rules.js"></script>
 <script defer src="opponent.js"></script>
 <script defer src="reference-v6.js"></script>
-<script defer src="game-v7.js"></script>
+<script defer src="game-v8.js"></script>
 </head>
 <body>
 <header class="mast"><a href="./" class="brand"><span aria-hidden="true">✦</span> تخته‌خانه</a><span>آموزش تعاملی تخته‌نرد</span></header>
@@ -38,6 +38,10 @@
         <input id="player-name" maxlength="28" autocomplete="given-name" dir="auto">
         <button type="submit">شروع بازی</button>
       </form>
+      <section class="lesson-card" id="lesson-card" aria-labelledby="lesson-card-title" hidden>
+        <h2 id="lesson-card-title"></h2>
+        <p id="lesson-card-text"></p>
+      </section>
       <div class="board-wrap">
         <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد" hidden></div>
         <section id="game-result" aria-labelledby="result-winner" hidden>
