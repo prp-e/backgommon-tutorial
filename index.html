@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تخته‌خانه | آموزش تعاملی تخته‌نرد</title>
-<meta name="description" content="تخته‌نرد را به فارسی، با تمرین‌های تعاملی و بازی با بزرگمهر یاد بگیرید.">
+<meta name="description" content="تخته‌نرد را با یک بازی کامل در برابر بزرگمهر و راهنمای فارسی یاد بگیرید.">
 <meta name="theme-color" content="#191511">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="تخته‌خانه">
@@ -22,11 +22,11 @@
 <main>
   <section class="intro">
     <p class="eyebrow">یادگیری با بازی</p>
-    <h1>تخته‌نرد، قدم‌به‌قدم</h1>
-    <p>از اولین تاس تا آخرین مهره، روی همین تخته تمرین کنید.</p>
+    <h1>تخته‌نرد با بزرگمهر</h1>
+    <p>از چیدن مهره‌ها تا پایان بازی، با بزرگمهر بازی کنید.</p>
   </section>
   <nav class="modes" aria-label="حالت بازی">
-    <button id="learn" aria-pressed="true">یادگیری روی تخته</button>
+    <button id="learn" aria-pressed="true">بازی با راهنما</button>
     <button id="play" aria-pressed="false">بازی با رایانه</button>
   </nav>
   <div class="layout" id="layout">
@@ -45,6 +45,7 @@
             <p class="eyebrow" id="result-kind"></p>
             <h2 id="result-winner"></h2>
             <p id="result-points"></p>
+            <p id="result-explanation" hidden></p>
             <button id="result-action"></button>
           </div>
         </section>
@@ -58,10 +59,6 @@
       <div id="feedback" role="status" hidden><strong id="feedback-grade"></strong> <span id="feedback-detail"></span></div>
       <div class="guide-actions" id="offer" hidden>
         <button id="accept">قبول دوبل</button><button id="decline">رد دوبل</button>
-      </div>
-      <div class="guide-actions tutorial-actions">
-        <button id="practice-double" hidden>پیشنهاد دوبل</button>
-        <button id="continue-lesson" hidden></button>
       </div>
       <div id="controls" hidden>
         <label>هدف مسابقه <select id="goal"><option value="1">تک‌بازی</option><option value="3">۳ امتیاز</option><option value="5">۵ امتیاز</option><option value="7">۷ امتیاز</option></select></label>

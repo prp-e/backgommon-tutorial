@@ -192,8 +192,3 @@ button, summary { touch-action: manipulation; }
 }
 
 .layout.guided { grid-template-columns: minmax(0, 1fr); max-width: 52rem; margin-inline: auto; }
-.tutorial-actions:not(:has(button:not([hidden]))) { display: none; }
-.tutorial-actions button {
-  width: 100%; min-height: 44px;
-  background: var(--gold); color: #24170b; border-color: var(--gold); font-weight: 700;
-}
