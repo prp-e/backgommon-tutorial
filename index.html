@@ -26,10 +26,10 @@
     <p>از اولین تاس تا آخرین مهره، روی همین تخته تمرین کنید.</p>
   </section>
   <nav class="modes" aria-label="حالت بازی">
-    <button id="learn" aria-pressed="true">تمرین و آموزش</button>
+    <button id="learn" aria-pressed="true">یادگیری روی تخته</button>
     <button id="play" aria-pressed="false">بازی با رایانه</button>
   </nav>
-  <div class="layout">
+  <div class="layout" id="layout">
     <section class="table" aria-label="میز بازی">
       <div class="table-head"><span id="turn"></span><span id="score"></span></div>
       <div class="hint" id="status" tabindex="-1" role="status" aria-live="polite"></div>
@@ -38,7 +38,6 @@
         <input id="player-name" maxlength="28" autocomplete="given-name" dir="auto">
         <button type="submit">شروع بازی</button>
       </form>
-      <div id="practice" hidden></div>
       <div class="board-wrap">
         <div class="board" id="board" dir="ltr" aria-label="تختهٔ تخته‌نرد"></div>
         <section id="game-result" aria-labelledby="result-winner" hidden>
@@ -60,22 +59,20 @@
       <div class="guide-actions" id="offer" hidden>
         <button id="accept">قبول دوبل</button><button id="decline">رد دوبل</button>
       </div>
-      <button id="continue-lesson" hidden></button>
+      <div class="guide-actions tutorial-actions">
+        <button id="practice-double" hidden>پیشنهاد دوبل</button>
+        <button id="continue-lesson" hidden></button>
+      </div>
       <div id="controls" hidden>
         <label>هدف مسابقه <select id="goal"><option value="1">تک‌بازی</option><option value="3">۳ امتیاز</option><option value="5">۵ امتیاز</option><option value="7">۷ امتیاز</option></select></label>
         <button id="double">پیشنهاد دوبل</button>
         <button id="restart">مسابقهٔ تازه</button>
       </div>
     </section>
-    <aside class="guide">
-      <div id="lesson-nav" aria-label="درس‌ها"></div>
-      <p class="eyebrow" id="section"></p>
-      <h2 id="lesson-title"></h2>
-      <p id="lesson-text"></p>
-      <div class="guide-actions">
-        <button id="previous">درس قبلی</button>
-        <button id="next">درس بعدی</button>
-      </div>
+    <aside class="guide" id="guide" hidden>
+      <p class="eyebrow">رقابت با رایانه</p>
+      <h2>بازی با رایانه</h2>
+      <p>شما مهره‌های روشن را حرکت می‌دهید و بزرگمهر مهره‌های تیره را. بعد از هر حرکت، ارزیابی همان حرکت و در صورت وجود یک پیشنهاد بهتر را می‌بینید.</p>
     </aside>
   </div>
   <details class="reference">

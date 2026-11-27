@@ -4,6 +4,7 @@ const $ = id => document.getElementById(id);
 const fa = number => number.toLocaleString('fa-IR');
 const colors = ['روشن', 'تیره'];
 const names = ['شما', 'بزرگمهر'];
+const scoringReasons = ['برد عادی', 'مارس', 'برد سه‌امتیازی'];
 const gradeLabels = ['خیلی بد', 'بد', 'متوسط', 'خوب', 'بی‌نقص'];
 const computerTurn = () => !tutorial && player === 1;
 let feedback, turnChoices, openingDice, gameResult;
@@ -14,27 +15,15 @@ let tutorial = true;
 let state, player, phase, selected, dice, remaining, options, message;
 const setupOrder = [23, 12, 7, 5];
 const setupCounts = Rules.initial().points;
-const questions = [
-  {
-    prompt: 'حریف هیچ مهره‌ای خارج نکرده و مهره‌ای روی خط وسط دارد. برد چند امتیاز پایه دارد؟',
-    options: ['۱ امتیاز', '۲ امتیاز', '۳ امتیاز'], answer: 2,
-    explanation: 'برد سه‌امتیازی است، چون حریف هنوز مهره‌ای روی خط وسط دارد.',
-  },
-  {
-    prompt: 'ارزش مکعب ۲ است. اگر حریف پیشنهاد دوبل را رد کند، چند امتیاز می‌گیرید؟',
-    options: ['۱ امتیاز', '۲ امتیاز', '۴ امتیاز'], answer: 1,
-    explanation: 'با رد دوبل، امتیاز برابر با ارزش قبلی مکعب است.',
-  },
-];
-let setupIndex, quizIndex, solved;
+let setupIndex, solved;
 let scores, goal, cube, owner, usedCrawford, isCrawford, animation;
 
 function start() {
   clearTimeout(animation);
   player = 0;
   const current = Lessons[lesson];
-  phase = tutorial ? (current.setup ? 'setup' : current.quiz ? 'quiz' : 'ready') : 'opening';
-  setupIndex = quizIndex = 0;
+  phase = !tutorial || current.opening ? 'opening' : current.setup ? 'setup' : 'ready';
+  setupIndex = 0;
   solved = false;
   feedback = null;
   gameResult = null;
@@ -42,20 +31,20 @@ function start() {
   openingDice = false;
   state = tutorial && Lessons[lesson].position ? Lessons[lesson].position() : Rules.initial();
   if (phase === 'setup') {
-    state.points = setupCounts.map(count => Math.min(0, count));
+    state.points = setupCounts.map(count => count > 0 ? count - 1 : count);
   }
   selected = null;
   dice = [];
   remaining = [];
   options = [];
-  cube = 1;
-  owner = null;
-  isCrawford = !tutorial && Rules.crawford(scores, goal, usedCrawford);
-  if (isCrawford) usedCrawford = true;
-  message = tutorial ? (Lessons[lesson].task || Lessons[lesson].extra) :
+  const redoubling = tutorial && current.double === 'decline';
+  cube = redoubling ? 2 : 1;
+  owner = redoubling ? 0 : null;
+  isCrawford = tutorial ? !!current.crawford : Rules.crawford(scores, goal, usedCrawford);
+  if (!tutorial && isCrawford) usedCrawford = true;
+  message = tutorial ? current.task :
     'برای شروع، شما و بزرگمهر هر کدام یک تاس می‌ریزید. تاس کوچک‌تر شروع می‌کند.';
-  if (phase === 'setup') message = setupHint();
-  if (phase === 'quiz') message = 'یک گزینه را انتخاب کنید.';
+  if (phase === 'setup') message += ' ' + setupHint();
   render();
 }
 
@@ -78,38 +67,7 @@ function placeChecker(point) {
   if (solved) phase = 'done';
   message = solved ? 'هر ۱۵ مهرهٔ روشن سر جای خود است. می‌توانید اولین حرکت را تمرین کنید.' : setupHint();
   render();
-  (solved ? nextLessonControl() : boardButtons.get(setupOrder[setupIndex])).focus({ preventScroll: true });
-}
-
-function renderPractice() {
-  const area = $('practice');
-  area.hidden = !tutorial || phase !== 'quiz';
-  area.replaceChildren();
-  if (area.hidden) return;
-  const question = questions[quizIndex];
-  const prompt = document.createElement('strong');
-  prompt.textContent = question.prompt;
-  area.append(prompt);
-  const choices = document.createElement('div');
-  choices.className = 'quiz-choices';
-  question.options.forEach((label, index) => {
-    const button = document.createElement('button');
-    button.textContent = label;
-    button.onclick = () => {
-      if (index !== question.answer) {
-        $('status').textContent = 'یک بار دیگر امتحان کنید.';
-        return;
-      }
-      quizIndex++;
-      solved = quizIndex === questions.length;
-      if (solved) phase = 'done';
-      message = question.explanation + (solved ? ' تمرین امتیازدهی کامل شد.' : '');
-      render();
-      (solved ? nextLessonControl() : area.querySelector('button')).focus({ preventScroll: true });
-    };
-    choices.append(button);
-  });
-  area.append(choices);
+  (solved ? $('continue-lesson') : boardButtons.get(setupOrder[setupIndex])).focus({ preventScroll: true });
 }
 
 function newMatch() {
@@ -125,7 +83,9 @@ function updateMoves() {
     options = turnChoices.map(choice => choice.move);
     return;
   }
-  const firstMoves = Rules.sequences(state, player, remaining).flatMap(sequence => sequence.slice(0, 1));
+  const firstMoves = Rules.sequences(state, player, remaining)
+    .flatMap(sequence => sequence.slice(0, 1))
+    .filter(move => !Lessons[lesson].bearOff || move.to === OFF);
   options = [...new Map(firstMoves.map(move => [JSON.stringify(move), move])).values()];
 }
 
@@ -180,7 +140,7 @@ function roll() {
     queueComputer();
     return;
   }
-  if (!['ready', 'opening', 'done'].includes(phase)) return;
+  if (!['ready', 'opening', 'done'].includes(phase) || tutorial && canDouble()) return;
   if (phase === 'done') {
     start();
     return;
@@ -207,6 +167,7 @@ function roll() {
     updateMoves();
     message = opening ? names[0] + ' ' + fa(dice[0]) + ' آورد و بزرگمهر ' + fa(dice[1]) +
       ' آورد. ' + names[player] + ' با تاس کوچک‌تر شروع می‌کند و هر دو عدد را بازی می‌کند.' :
+      tutorial ? Lessons[lesson].afterRoll :
       computerTurn() ? 'بزرگمهر حرکتش را انتخاب می‌کند.' :
       state.bar[player] ? 'ابتدا مهرهٔ خط وسط را وارد کنید.' : 'یک مهره و سپس مقصد آن را انتخاب کنید.';
     if (!options.length) {
@@ -214,6 +175,7 @@ function roll() {
       message = computerTurn() ? 'بزرگمهر حرکت مجازی ندارد.' : 'با این تاس‌ها هیچ حرکت مجازی ندارید. نوبت را واگذار کنید.';
     }
     render();
+    if (tutorial) $('board').querySelector('.origin')?.focus();
     queueComputer();
   }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 30 : 640);
 }
@@ -253,10 +215,17 @@ function makeMove(move) {
   if (tutorial && !options.length) {
     phase = 'done';
     solved = true;
-    message = 'آفرین! تمرین کامل شد. می‌توانید این تمرین را تکرار کنید یا به درس بعد بروید.';
+    const current = Lessons[lesson];
+    if (state.off[player] === 15) {
+      const multiplier = Rules.multiplier(state, player);
+      message = (current.complete || scoringReasons[multiplier - 1]) +
+        ' ' + fa(cube * multiplier) + ' امتیاز گرفتید.';
+    } else {
+      message = current.complete;
+    }
   } else if (!tutorial && state.off[player] === 15) {
     const multiplier = Rules.multiplier(state, player);
-    finish(player, cube * multiplier, ['برد عادی', 'مارس', 'برد سه‌امتیازی'][multiplier - 1]);
+    finish(player, cube * multiplier, scoringReasons[multiplier - 1]);
   } else if (!options.length) {
     phase = 'pass';
     message = (hit ? 'مهرهٔ حریف به خط وسط رفت. ' : '') +
@@ -277,7 +246,8 @@ function makeMove(move) {
   }
   queueComputer();
   if (computerTurn()) return;
-  const focus = options.length && phase === 'moving' ? $('board').querySelector('.origin') : $('roll');
+  const focus = tutorial && solved ? $('continue-lesson') :
+    options.length && phase === 'moving' ? $('board').querySelector('.origin') : $('roll');
   focus?.focus();
 }
 
@@ -291,21 +261,30 @@ function finish(winner, points, reason) {
 }
 
 function canDouble() {
-  return !tutorial && phase === 'ready' && !isCrawford && (owner === null || owner === player);
+  return phase === 'ready' && !isCrawford && (owner === null || owner === player) &&
+    (!tutorial || Lessons[lesson].double);
 }
 
-$('double').onclick = () => {
+function offerDouble() {
   if (!canDouble() || computerTurn()) return;
-  if (Opponent.evaluate(state, 1) < -27) {
+  if (tutorial && Lessons[lesson].double === 'decline') {
+    phase = 'done';
+    solved = true;
+    message = 'بزرگمهر دوبل را رد کرد. ارزش قبلی مکعب ۲ بود و ۲ امتیاز گرفتید.';
+  } else if (!tutorial && Opponent.evaluate(state, 1) < -27) {
     finish(0, cube, 'بزرگمهر دوبل را رد کرد');
   } else {
     cube *= 2;
     owner = 1;
-    message = 'بزرگمهر دوبل را پذیرفت. حالا تاس بریزید.';
+    message = tutorial ?
+      'بزرگمهر دوبل را پذیرفت. ارزش بازی ۲ شد و مکعب به او رسید. حالا تاس بریزید.' :
+      'بزرگمهر دوبل را پذیرفت. حالا تاس بریزید.';
   }
   render();
-  (gameResult ? $('result-action') : $('roll')).focus();
-};
+  (gameResult ? $('result-action') : tutorial && solved ? $('continue-lesson') : $('roll')).focus();
+}
+$('double').onclick = offerDouble;
+$('practice-double').onclick = offerDouble;
 $('accept').onclick = () => {
   if (phase !== 'offer') return;
   cube *= 2;
@@ -367,11 +346,12 @@ function render(targets = []) {
   const active = phase === 'moving' && !busy ? options : [];
   $('learn').setAttribute('aria-pressed', tutorial);
   $('play').setAttribute('aria-pressed', !tutorial);
-  $('turn').textContent = tutorial ? 'تمرین با مهرهٔ روشن' :
+  $('turn').textContent = tutorial ? current.title :
     enteringName || phase === 'opening' ? 'تاس شروع' : 'نوبت ' + names[player];
   const settingUp = phase === 'setup';
   const setupTarget = setupOrder[setupIndex];
-  $('score').textContent = settingUp ? fa(state.points.reduce((sum, count) => sum + Math.max(0, count), 0)) + ' از ۱۵ مهره چیده شد' : tutorial ? 'درس ' + fa(lesson + 1) + ' از ' + fa(Lessons.length) :
+  $('score').textContent = settingUp ? fa(state.points.reduce((sum, count) => sum + Math.max(0, count), 0)) + ' از ۱۵ مهره چیده شد' : tutorial ? fa(lesson + 1) + ' از ' + fa(Lessons.length) +
+    (current.double ? ' · دوبل ' + fa(cube) : current.crawford ? ' · کرافورد' : '') :
     names[0] + ' ' + fa(scores?.[0] ?? 0) + ' · بزرگمهر ' + fa(scores?.[1] ?? 0) + ' | ' +
     (isCrawford ? 'کرافورد' : 'دوبل ' + fa(cube) + ' · ' + (owner === null ? 'وسط' : names[owner]));
   for (const [point, button] of boardButtons) {
@@ -430,7 +410,8 @@ function render(targets = []) {
     button.onclick = () => makeMove(move);
     $('moves').append(button);
   }
-  $('roll').disabled = busy || !['opening', 'ready', 'pass', 'next', 'done'].includes(phase);
+  $('practice-double').hidden = !tutorial || !canDouble();
+  $('roll').disabled = busy || tutorial && canDouble() || !['opening', 'ready', 'pass', 'next', 'done'].includes(phase);
   $('roll').textContent = ({
     opening: 'تاس شروع', pass: 'پایان نوبت', next: 'بازی بعدی', done: 'تکرار تمرین', rolling: 'در حال تاس ریختن',
   })[phase] || 'تاس بریز';
@@ -452,30 +433,18 @@ function render(targets = []) {
   }
   $('double').disabled = !canDouble() || computerTurn();
   $('offer').hidden = phase !== 'offer';
-  $('lesson-nav').hidden = !tutorial;
-  $('section').textContent = tutorial ? 'درس ' + fa(lesson + 1) : 'رقابت با رایانه';
-  $('lesson-title').textContent = tutorial ? current.title : 'بازی با رایانه';
-  $('lesson-text').textContent = tutorial ? current.text + (current.extra ? ' ' + current.extra : '') :
-    'شما مهره‌های روشن را حرکت می‌دهید و بزرگمهر مهره‌های تیره را. بعد از هر حرکت، ارزیابی همان حرکت و در صورت وجود یک پیشنهاد بهتر را می‌بینید.';
+  $('guide').hidden = tutorial;
   $('status').textContent = message;
-  renderPractice();
-  $('board').hidden = enteringName || phase === 'quiz' || (tutorial && current.quiz);
-  $('game-tray').hidden = !!gameResult || enteringName || tutorial && (current.quiz || (current.setup && !solved));
-  $('previous').hidden = !tutorial || lesson === 0;
-  $('next').hidden = !tutorial;
-  $('next').classList.toggle('lesson-solved', tutorial && solved);
-  $('next').textContent = lesson === Lessons.length - 1 ? 'شروع بازی با بزرگمهر' : 'درس بعدی';
+  $('board').hidden = enteringName;
+  $('game-tray').hidden = !!gameResult || enteringName || settingUp;
+  $('off').hidden = tutorial && !!current.setup;
+  $('layout').classList.toggle('guided', tutorial);
   $('continue-lesson').hidden = !tutorial || !solved;
-  $('continue-lesson').textContent = $('next').textContent;
-  [...$('lesson-nav').children].forEach((button, index) => button.setAttribute('aria-current', index === lesson ? 'step' : 'false'));
+  $('continue-lesson').textContent = lesson === Lessons.length - 1 ? 'بازی با بزرگمهر' : 'موقعیت بعدی';
 }
 
-for (const [index, item] of Lessons.entries()) {
-  const button = document.createElement('button');
-  button.textContent = fa(index + 1);
-  button.setAttribute('aria-label', item.title);
-  button.onclick = () => openLesson(index);
-  $('lesson-nav').append(button);
+for (const item of Lessons) {
+  if (!item.text) continue;
   const section = document.createElement('section');
   const heading = document.createElement('h3');
   const paragraph = document.createElement('p');
@@ -500,24 +469,17 @@ $('match-name').onsubmit = event => {
   newMatch();
   $('roll').focus();
 };
-function nextLessonControl() {
-  return matchMedia('(max-width: 790px)').matches ? $('continue-lesson') : $('next');
-}
-
-function openLesson(index) {
-  lesson = index;
-  start();
-  $('status').focus();
-}
 function advanceLesson() {
+  if (!tutorial || !solved) return;
   if (lesson === Lessons.length - 1) {
     $('play').click();
   } else {
-    openLesson(lesson + 1);
+    lesson++;
+    start();
+    (phase === 'setup' ? boardButtons.get(setupOrder[setupIndex]) :
+      $('practice-double').hidden ? $('roll') : $('practice-double')).focus();
   }
 }
-$('previous').onclick = () => openLesson(lesson - 1);
-$('next').onclick = advanceLesson;
 $('continue-lesson').onclick = advanceLesson;
 $('off').onclick = () => select(OFF);
 $('roll').onclick = () => { if (!computerTurn() || ['next', 'finished'].includes(phase)) roll(); };

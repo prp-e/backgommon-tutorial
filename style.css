@@ -101,12 +101,9 @@ p { line-height: 1.95; margin: .65rem 0; }
   88% { transform: translateY(-7px) rotate(calc(var(--spin) * 355deg)); }
   100% { transform: rotate(calc(var(--spin) * 360deg)); }
 }
-#moves, #controls, .guide-actions, #lesson-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+#moves, #controls, .guide-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 #moves:not(:empty), #controls { margin-top: .8rem; }
 #moves, #controls { color: var(--muted); font-size: .9rem; }
-#lesson-nav { margin-bottom: 1.25rem; }
-#lesson-nav button { min-width: 2.2rem; padding: .35rem; }
-#lesson-nav [aria-current="step"] { background: #5d3f27; color: var(--gold); border-color: var(--gold); }
 .hint { margin: 1.15rem 0; padding: .85rem; border-radius: .55rem; border-inline-start: 3px solid var(--gold); background: #35291f; line-height: 1.85; }
 .reference { margin-top: 1rem; padding: 1rem 1.25rem; }
 .reference summary { font-weight: bold; }
@@ -122,8 +119,6 @@ p { line-height: 1.95; margin: .65rem 0; }
 @media (prefers-reduced-motion: reduce) { .die.rolling { animation: none; } }
 
 .table .hint { margin: 0 0 .75rem; }
-#practice { padding: .6rem 0; line-height: 1.8; }
-.quiz-choices { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
 .guide-actions { margin-top: .9rem; }
 .point.place-here { background: #9bdfb34d; box-shadow: inset 0 0 0 2px var(--green); }
 .placement-count {
@@ -131,7 +126,6 @@ p { line-height: 1.95; margin: .65rem 0; }
   border-radius: .35rem; background: #172e21; color: var(--green);
   font-weight: 800; font-size: clamp(.7rem, 2vw, 1rem); pointer-events: none;
 }
-.lesson-solved { box-shadow: 0 0 0 2px var(--green); }
 
 body {
   padding-inline-start: env(safe-area-inset-right, 0px);
@@ -140,17 +134,11 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 button, summary { touch-action: manipulation; }
-#continue-lesson { display: none; }
 @media (max-width: 790px) {
   .table .hint { font-size: .95rem; }
   .modes button, .tray button, #controls button, #controls select,
-  .guide-actions button, .quiz-choices button, #lesson-nav button, #continue-lesson {
+  .guide-actions button {
     min-height: 44px;
-  }
-  #lesson-nav button { min-width: 44px; }
-  #continue-lesson {
-    display: block; width: 100%; margin-top: .75rem;
-    background: var(--gold); color: #24170b; border-color: var(--gold); font-weight: 700;
   }
 }
 @media (max-width: 430px) {
@@ -201,4 +189,11 @@ button, summary { touch-action: manipulation; }
 #result-action {
   min-height: 44px; margin-top: .45rem; background: var(--gold);
   color: #24170b; border-color: var(--gold); font-weight: 700;
+}
+
+.layout.guided { grid-template-columns: minmax(0, 1fr); max-width: 52rem; margin-inline: auto; }
+.tutorial-actions:not(:has(button:not([hidden]))) { display: none; }
+.tutorial-actions button {
+  width: 100%; min-height: 44px;
+  background: var(--gold); color: #24170b; border-color: var(--gold); font-weight: 700;
 }
