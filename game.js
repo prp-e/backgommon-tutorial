@@ -465,6 +465,7 @@ $('match-name').onsubmit = event => {
   names[0] = $('player-name').value.trim() || 'شما';
   newMatch();
   focusTurnStart();
+  showInstallHelp();
 };
 $('off').onclick = () => select(OFF);
 $('roll').onclick = () => { if (!computerTurn() || ['next', 'finished'].includes(phase)) roll(); };
@@ -477,6 +478,50 @@ $('result-action').onclick = () => {
 };
 $('goal').onchange = () => { newMatch(); focusTurnStart(); };
 newMatch('name');
+
+const installHelp = $('install-help');
+const installDialog = $('install-dialog');
+const installHintKey = 'takhteh-khaneh-install-help-seen';
+const userAgent = navigator.userAgent;
+const installInstructions = /iPhone/i.test(userAgent) ? [
+  ['صفحه را در سافاری باز کنید.'],
+  ['از منوی صفحه یا نوار ابزار، ', 'Share', ' را بزنید و ', 'Add to Home Screen', ' را انتخاب کنید.'],
+  ['اگر ', 'Open as Web App', ' را می‌بینید، آن را روشن کنید و ', 'Add', ' را بزنید.'],
+] : /Android/i.test(userAgent) && (/Mobile/i.test(userAgent) || navigator.userAgentData?.mobile) ? [
+  ['صفحه را در کروم باز کنید.'],
+  ['از منوی سه‌نقطه، ', 'Add to home screen', ' را بزنید.'],
+  ['اگر ', 'Install', ' یا ', 'Install app', ' را می‌بینید، آن را انتخاب و تأیید کنید.'],
+] : [];
+const installed = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+let installHelpSeen = false;
+try { installHelpSeen = localStorage.getItem(installHintKey) === 'yes'; } catch {}
+
+if (installInstructions.length && !installed && typeof installDialog.showModal === 'function') {
+  for (const parts of installInstructions) {
+    const step = document.createElement('li');
+    parts.forEach((part, index) => {
+      if (index % 2 === 0) {
+        step.append(part);
+      } else {
+        const label = document.createElement('bdi');
+        label.dir = 'ltr';
+        label.textContent = part;
+        step.append(label);
+      }
+    });
+    $('install-steps').append(step);
+  }
+  installHelp.hidden = false;
+  installHelp.onclick = () => installDialog.showModal();
+  installDialog.addEventListener('close', () => {
+    installHelpSeen = true;
+    try { localStorage.setItem(installHintKey, 'yes'); } catch {}
+  });
+}
+
+function showInstallHelp() {
+  if (!installHelp.hidden && !installHelpSeen) installDialog.showModal();
+}
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => {
